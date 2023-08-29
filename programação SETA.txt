@@ -1,0 +1,78 @@
+#define valvula 7
+// incluindo a biblioteca do painel LCD
+#include <LiquidCrystal.h>
+ 
+// associa os pinos do arduino a biblioteca
+const int rs = 12, en = 11, d4 = 5, d5 = 4, d6 = 3, d7 = 2;
+LiquidCrystal lcd(rs, en, d4, d5, d6, d7);
+ 
+void setup() {
+// inicializa o serial
+Serial.begin(9600);
+lcd.begin(16, 2); //inicializa o painel LCD
+delay(5000); //intervalo de 5 segundos
+ 
+pinMode(valvula, OUTPUT); // define o modo da válvula para saída de sina
+ 
+}
+ 
+void loop() {
+lcd.setCursor(0, 0); //defini o cursor do painel LCD para a primeira linha
+int nivelagua = analogRead(A0); //cria uma variável "nivelagua" e atribui ela a leitura do pino analógico 0 do Arduino UNO
+ 
+lcd.print(nivelagua); //imprime no painel lcd o valor do nível da água
+delay(250);
+ 
+if (nivelagua > 500) { //verifica quando o sensor de nível d'água detectar acima de 500, para então ligar a válvula
+lcd.setCursor(0, 1); //defini o cursor do painel LCD para a segunda linha
+lcd.println("ativado"); // imprime no painel LCD quando a válvula é ativada    digitalWrite(valvula, HIGH); //liga a valvula, liberando o fluxo de água  delay(1000); //intervalo de 1000 milissegundos
+}
+else{ //quando a verificação não validar a execução da primeira condição, desliga a válvula
+ 
+lcd.print("desativado"); //imprime no painel LCD quando a válvula é desativada
+ 
+delay(250); //espera ¼ de um segundo
+digitalWrite(valvula, LOW); //desliga a válvula, bloqueando o fluxo de água
+}
+delay(1000); //intervalo de 1000 milissegundos
+}
+ 
+#include <OneWire.h> //inclusão de biblioteca
+#include <DallasTemperature.h> //inclusão de biblioteca
+// incluindo a biblioteca do display LCD
+#include <LiquidCrystal.h>
+ 
+// associa os pinos do arduino a biblioteca
+const int rs = 12, en = 11, d4 = 5, d5 = 4, d6 = 3, d7 = 2;
+LiquidCrystal lcd(rs, en, d4, d5, d6, d7);
+ 
+#define DS18B20 7 //define o pino digital utilizado pelo sensor 
+#define valvula 6 //defino o pino digital utilizado pela válvula
+ 
+OneWire ourWire(DS18B20); //configura uma instância onewire para se comunicar com o sensor
+DallasTemperature sensors(&ourWire); //biblioteca DallasTemperature utiliza a OneWire 
+ 
+void setup(){ 
+  
+  lcd.begin(16, 2); //inicializa o painel LCD
+  Serial.begin(9600); //inicializa a serial 
+  sensors.begin(); //inicia o sensor
+  pinMode(valvula, OUTPUT); //define o modo da valvula para saida de sinal  
+  delay(5000); //intervalo de 5 segundos
+} 
+ 
+void loop(){ 
+ 
+  sensors.requestTemperatures();//solicita que a função informe a temperatura do sensor 
+  
+  if (sensors.getTempCByIndex(0) >= 60) { // quando a temperatura que o sensor detectar for maior que 60 graus celsius, espera 30 minutos e ativa a valvula
+    lcd.print("Temperatura: " sensors.getTempCByIndex(0)"*C"); // imprime o texto no painel LCD 
+    delay(1800000); //espera 30 minutos
+    digitalWrite(valvula, HIGH); // liga a valvula, liberando o fluxo de água
+ 
+  }
+  else{
+      digitalWrite(valvula, LOW); //desliga a valvula, bloqueando o fluxo de água
+      lcd.print("Temperatura: " sensors.getTempCByIndex(0)"*C"); // imprime o texto no painel LCD  
+  delay(1000); //espera 1 segundo
+  }
